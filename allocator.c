@@ -109,6 +109,30 @@ void release_memory(process){
     printf("\nProcess not found");
 }
 
+void compact_memory(){
+    Memblock *curr = memory;
+    Memblock *last = NULL;
+    Memblock *nextBlock = NULL;
+
+    while(curr){
+        if(curr->allocated == 1){
+            last = curr;
+            curr = curr -> next;
+        }
+        else if (curr -> next){
+            nextBlock = curr -> next;
+            last -> next = nextBlock;
+            nextBlock -> start = last -> end + 1;
+            nextBlock -> end = nextBlock -> start + nextBlock -> size - 1;
+            free(curr);
+            curr = nextBlock;
+        }
+    }
+    int usedEnd = last -> end;
+    Memblock *unused = create_block(usedEnd + 1, MEMORY_SIZE - usedEnd - 1, 0, "Unused");
+    last -> next = unused;
+}
+
 int main(int argc, char*argv[]) {
 
     //0B < Memory size < 1MB
