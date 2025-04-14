@@ -34,7 +34,12 @@ void initialize_memory(){
 }
 
 void split_block(Memblock *target, int size){
-    
+    Memblock *newBlock = create_block(target -> start + size, target -> size - size, 0, "Unused");
+    newBlock -> next = target -> next;
+
+    target -> next = newBlock;
+    target -> end = target -> start + size - 1;
+    target -> size = size;
 }
 
 int fits(Memblock *block, int size){
@@ -75,11 +80,11 @@ void allocate_memory(process, size, strategy){
         }
     }
     else{
-        printf("\nInvalid strategy type, please choose F, B, or W.");
+        printf("\nInvalid strategy type, please choose F, B, or W");
     }
 
     if (!target){
-        printf("\nNo suitable open block found.");
+        printf("\nNo suitable open block found");
         return;
     }
 
@@ -97,9 +102,16 @@ void allocate_memory(process, size, strategy){
 
 void release_memory(process){
     Memblock* curr = memory;
-    while (strcmp(memory -> process, process) != 0){
-        
+    while (curr){
+        if (strcmp(curr -> process, process) == 0){
+            curr -> allocated = 0;
+            strcpy(curr -> process, "Unused");
+            return;
+        }
+        curr = curr -> next;
     }
+
+    printf("\nProcess not found")
 
 }
 
