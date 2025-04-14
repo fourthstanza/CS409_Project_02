@@ -4,7 +4,7 @@
 
 #define PR_LENGTH 10
 
-int MEMORY_SIZE = 128;
+int MEMORY_SIZE;
 
 typedef struct Memblock {
     int start;
@@ -30,7 +30,69 @@ Memblock* create_block(int start, int size, int allocated, const char* process) 
 Memblock *memory = NULL;
 
 void initialize_memory(){
-    memory = create_block(0, MEMORY_SIZE, 0, "FREE");
+    memory = create_block(0, MEMORY_SIZE, 0, "Unused");
+}
+
+void split_block(Memblock *target, int size){
+    
+}
+
+int fits(Memblock *block, int size){
+    return (!block -> allocated && block -> size >= size);
+}
+
+void allocate_memory(process, size, strategy){
+    Memblock *curr = memory;
+    Memblock *target = NULL;
+
+    if (strcmp(strategy, "F") == 0){
+        while (curr){
+            if(fits(curr, size)){
+                target = curr;
+                break;
+            }
+            curr = curr -> next;
+        }
+    }
+    else if (strcmp(strategy, "B") == 0){
+        int bestSize = MEMORY_SIZE;
+        while(curr){
+            if(fits(curr,size) && curr -> size < bestSize){
+                target = curr;
+                bestSize = target -> size;
+            }
+            curr = curr -> next;
+        }
+    }
+    else if (strcmp(strategy, "W") == 0){
+        int worstSize = 0;
+        while(curr){
+            if(fits(curr,size) && curr -> size > worstSize){
+                target = curr;
+                worstSize = target -> size;
+            }
+            curr = curr -> next;
+        }
+    }
+    else{
+        printf("\nInvalid strategy type, please choose F, B, or W.");
+    }
+
+    if (!target){
+        printf("\nNo suitable open block found.");
+        return;
+    }
+
+    if (target -> size == size){
+        target -> allocated = 1;
+        strcpy(target -> process, process);
+    }
+    else{
+        split_block(target, size);
+    }
+
+    
+
 }
 
 void release_memory(process){
