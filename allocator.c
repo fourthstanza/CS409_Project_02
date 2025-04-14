@@ -88,16 +88,11 @@ void allocate_memory(process, size, strategy){
         return;
     }
 
-    if (target -> size == size){
-        target -> allocated = 1;
-        strcpy(target -> process, process);
-    }
-    else{
+    if (!target -> size == size){
         split_block(target, size);
     }
-
-    
-
+    target -> allocated = 1;
+    strcpy(target -> process, process);
 }
 
 void release_memory(process){
@@ -106,13 +101,12 @@ void release_memory(process){
         if (strcmp(curr -> process, process) == 0){
             curr -> allocated = 0;
             strcpy(curr -> process, "Unused");
+            printf("Memory for process %s deallocated", process);
             return;
         }
         curr = curr -> next;
     }
-
-    printf("\nProcess not found")
-
+    printf("\nProcess not found");
 }
 
 int main(int argc, char*argv[]) {
