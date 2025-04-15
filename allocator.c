@@ -4,7 +4,7 @@
 
 #define PR_LENGTH 10
 
-int MEMORY_SIZE;
+int MEMORY_SIZE = 128;
 
 typedef struct Memblock {
     int start;
@@ -46,9 +46,12 @@ int fits(Memblock *block, int size){
     return (!block -> allocated && block -> size >= size);
 }
 
-void allocate_memory(process, size, strategy){
+void allocate_memory(char *process, int size, char *strategy){
     Memblock *curr = memory;
     Memblock *target = NULL;
+
+    printf("\nMemory size: %d", memory -> size);
+    printf("\nProcess size: %d", size);
 
     if (strcmp(strategy, "F") == 0){
         while (curr){
@@ -88,14 +91,44 @@ void allocate_memory(process, size, strategy){
         return;
     }
 
-    if (!target -> size == size){
+    if (!(target -> size == size)){
         split_block(target, size);
     }
     target -> allocated = 1;
     strcpy(target -> process, process);
 }
 
-void release_memory(process){
+void compact_memory(){
+    Memblock *new_memory = NULL;
+    Memblock *curr = memory;
+    Memblock *currnew;
+    Memblock *next;
+
+    while(curr){
+        if(curr -> allocated == 1){
+            if(!new_memory){
+                new_memory = create_block(0, curr -> size, 1, curr -> process);
+                currnew = new_memory;
+            }
+            else{
+                Memblock *temp = create_block(currnew -> end + 1, currnew -> size, 1, currnew -> process);
+                currnew -> next = temp;
+                currnew = temp;
+            }
+            next = curr -> next;
+        }
+        else{
+            next = curr -> next;
+        }
+        free(curr);
+        curr = next;
+    }
+
+
+
+}
+
+void release_memory(char *process){
     Memblock* curr = memory;
     while (curr){
         if (strcmp(curr -> process, process) == 0){
@@ -112,7 +145,7 @@ void release_memory(process){
 int main(int argc, char*argv[]) {
 
     //0B < Memory size < 1MB
-    MEMORY_SIZE = atoi(argv[1]);
+    //MEMORY_SIZE = atoi(argv[1]);
     if (MEMORY_SIZE < 0 || MEMORY_SIZE > 1048576){
         printf("\nInvalid memory length, defaulting to 128 bytes");
         MEMORY_SIZE = 128;
@@ -136,7 +169,7 @@ int main(int argc, char*argv[]) {
         } else if (strcmp(command, "C") == 0) {
             compact_memory();
         } else if (strcmp(command, "STAT") == 0) {
-            print_status();
+            //print_status();
         } else if (strcmp(command, "EXIT") == 0) {
             break;
         } else {
