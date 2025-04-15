@@ -110,6 +110,17 @@ void release_memory(process){
 }
 
 void compact_memory(){
+    
+    
+
+    //allocate a new block in a new memory linked list for every allocated block in the old list
+    //add a free block at the end
+    //free every block in the old list
+    //set the memory pointer to be equal to the new memory pointer
+
+
+    
+    /**
     Memblock *curr = memory;
     Memblock *last = NULL;
     Memblock *nextBlock = NULL;
@@ -131,6 +142,7 @@ void compact_memory(){
     int usedEnd = last -> end;
     Memblock *unused = create_block(usedEnd + 1, MEMORY_SIZE - usedEnd - 1, 0, "Unused");
     last -> next = unused;
+    */
 }
 
 int main(int argc, char*argv[]) {
