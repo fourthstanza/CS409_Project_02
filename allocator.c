@@ -4,7 +4,7 @@
 
 #define PR_LENGTH 10
 
-int MEMORY_SIZE;
+int MEMORY_SIZE = 128;
 
 typedef struct Memblock {
     int start;
@@ -14,7 +14,6 @@ typedef struct Memblock {
     char process[PR_LENGTH];
     struct Memblock *next;
 } Memblock;
-
 
 Memblock* create_block(int start, int size, int allocated, const char* process) {
     Memblock* block = (Memblock*)malloc(sizeof(Memblock));
@@ -46,7 +45,7 @@ int fits(Memblock *block, int size){
     return (!block -> allocated && block -> size >= size);
 }
 
-void allocate_memory(process, size, strategy){
+void allocate_memory(char *process, int size, char *strategy){
     Memblock *curr = memory;
     Memblock *target = NULL;
 
@@ -88,14 +87,61 @@ void allocate_memory(process, size, strategy){
         return;
     }
 
-    if (!target -> size == size){
+    if (!(target -> size == size)){
         split_block(target, size);
     }
     target -> allocated = 1;
     strcpy(target -> process, process);
 }
 
-void release_memory(process){
+void compact_memory(){
+    Memblock *new_memory = NULL;
+    Memblock *curr = memory;
+    Memblock *currnew;
+    Memblock *next;
+
+    while(curr){
+        if(curr -> allocated == 1){
+            if(!new_memory){
+                new_memory = create_block(0, curr -> size, 1, curr -> process);
+                currnew = new_memory;
+            }
+            else{
+                Memblock *temp = create_block(currnew -> end + 1, curr -> size, 1, curr -> process);
+                currnew -> next = temp;
+                currnew = temp;
+            }
+            next = curr -> next;
+        }
+        else{
+            next = curr -> next;
+        }
+        free(curr);
+        curr = next;
+    }
+
+    
+    int start = currnew -> end + 1;
+    int end = MEMORY_SIZE - start - 1;
+    int size = end - start;
+    if(size){
+        memory = new_memory;
+        return;
+    }
+    Memblock *free = create_block(start, size, 0, "Unused");
+}
+
+void print_status(){
+    Memblock *curr = memory;
+    while(curr){
+        if(curr -> allocated){
+            printf("\nAdresses [%d:%d] Process %s", curr -> start, curr -> end, curr -> process);
+        }
+        curr = curr -> next;
+    }
+}
+
+void release_memory(char *process){
     Memblock* curr = memory;
     while (curr){
         if (strcmp(curr -> process, process) == 0){
@@ -147,13 +193,19 @@ void compact_memory(){
 
 int main(int argc, char*argv[]) {
 
+
+    if(argc == 1){
+        printf("\nNo memory length specified, defaulting to 128 bytes");
+    }
+    else{
+        MEMORY_SIZE = atoi(argv[1]);
+    }
     //0B < Memory size < 1MB
-    MEMORY_SIZE = atoi(argv[1]);
-    if (MEMORY_SIZE < 0 || MEMORY_SIZE > 1048576){
+    if (MEMORY_SIZE <= 0 || MEMORY_SIZE > 1048576){
         printf("\nInvalid memory length, defaulting to 128 bytes");
         MEMORY_SIZE = 128;
     }
-
+    
     initialize_memory();
 
     char command[20], process[PR_LENGTH], strategy[2];
