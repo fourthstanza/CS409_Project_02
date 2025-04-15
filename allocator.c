@@ -15,7 +15,6 @@ typedef struct Memblock {
     struct Memblock *next;
 } Memblock;
 
-
 Memblock* create_block(int start, int size, int allocated, const char* process) {
     Memblock* block = (Memblock*)malloc(sizeof(Memblock));
     block->start = start;
