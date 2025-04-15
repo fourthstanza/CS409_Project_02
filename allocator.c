@@ -50,9 +50,6 @@ void allocate_memory(char *process, int size, char *strategy){
     Memblock *curr = memory;
     Memblock *target = NULL;
 
-    printf("\nMemory size: %d", memory -> size);
-    printf("\nProcess size: %d", size);
-
     if (strcmp(strategy, "F") == 0){
         while (curr){
             if(fits(curr, size)){
@@ -125,7 +122,16 @@ void compact_memory(){
     }
 
 
+}
 
+void print_status(){
+    Memblock *curr = memory;
+    while(curr){
+        if(curr -> allocated){
+            printf("\nAdresses [%d:%d] Process %s", curr -> start, curr -> end, curr -> process);
+        }
+        curr = curr -> next;
+    }
 }
 
 void release_memory(char *process){
@@ -169,7 +175,7 @@ int main(int argc, char*argv[]) {
         } else if (strcmp(command, "C") == 0) {
             compact_memory();
         } else if (strcmp(command, "STAT") == 0) {
-            //print_status();
+            print_status();
         } else if (strcmp(command, "EXIT") == 0) {
             break;
         } else {
