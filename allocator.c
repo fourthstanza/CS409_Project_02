@@ -108,7 +108,7 @@ void compact_memory(){
                 currnew = new_memory;
             }
             else{
-                Memblock *temp = create_block(currnew -> end + 1, currnew -> size, 1, currnew -> process);
+                Memblock *temp = create_block(currnew -> end + 1, curr -> size, 1, curr -> process);
                 currnew -> next = temp;
                 currnew = temp;
             }
@@ -121,7 +121,15 @@ void compact_memory(){
         curr = next;
     }
 
-
+    
+    int start = currnew -> end + 1;
+    int end = MEMORY_SIZE - start - 1;
+    int size = end - start;
+    if(size){
+        memory = new_memory;
+        return;
+    }
+    Memblock *free = create_block(start, size, 0, "Unused");
 }
 
 void print_status(){
@@ -150,13 +158,19 @@ void release_memory(char *process){
 
 int main(int argc, char*argv[]) {
 
+
+    if(argc == 1){
+        printf("\nNo memory length specified, defaulting to 128 bytes");
+    }
+    else{
+        MEMORY_SIZE = atoi(argv[1]);
+    }
     //0B < Memory size < 1MB
-    //MEMORY_SIZE = atoi(argv[1]);
-    if (MEMORY_SIZE < 0 || MEMORY_SIZE > 1048576){
+    if (MEMORY_SIZE <= 0 || MEMORY_SIZE > 1048576){
         printf("\nInvalid memory length, defaulting to 128 bytes");
         MEMORY_SIZE = 128;
     }
-
+    
     initialize_memory();
 
     char command[20], process[PR_LENGTH], strategy[2];
